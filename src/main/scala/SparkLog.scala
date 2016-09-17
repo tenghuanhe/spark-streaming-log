@@ -17,9 +17,9 @@ object SparkLog {
     Logger.getLogger("akka").setLevel(Level.OFF)
     Logger.getLogger("com").setLevel(Level.OFF)
 
-    val sparkConf = new SparkConf().setAppName("QueueStream").setMaster("local[4]")
+    val sparkConf = new SparkConf().setAppName("QueueStream").setMaster("local[1]")
     // Create the context
-    val ssc = new StreamingContext(sparkConf, Seconds(2))
+    val ssc = new StreamingContext(sparkConf, Seconds(1))
 
     // Create the queue through which RDDS can be pushed to
     // a QueueInputDStream
@@ -29,13 +29,15 @@ object SparkLog {
     val inputStream = ssc.queueStream(rddQueue)
     val mappedStream = inputStream.map(x => (x % 10, 1))
     val reducedStream = mappedStream.reduceByKey(_ + _)
+    //    val reducedStream = mappedStream.reduceByKeyAndWindow((a: Int, b: Int) => a + b, Seconds(3), Seconds(1))
     reducedStream.print()
+    ssc.addStreamingListener(new CustomStreamingListener())
     ssc.start()
 
     // Create and push some RDDs into rddQueue
-    for (i <- 1 to 30) {
+    for (i <- 1 to 10) {
       rddQueue.synchronized {
-        rddQueue += ssc.sparkContext.makeRDD(1 to 1000, 10)
+        rddQueue += ssc.sparkContext.makeRDD(1 to 10000, 10)
       }
 
       Thread.sleep(1000)
