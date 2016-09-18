@@ -32,10 +32,11 @@ object SparkLog {
     //    val reducedStream = mappedStream.reduceByKeyAndWindow((a: Int, b: Int) => a + b, Seconds(3), Seconds(1))
     reducedStream.print()
     ssc.addStreamingListener(new CustomStreamingListener())
+    ssc.sparkContext.addSparkListener(new CustomSparkListener())
     ssc.start()
 
     // Create and push some RDDs into rddQueue
-    for (i <- 1 to 10) {
+    for (i <- 1 to 10000) {
       rddQueue.synchronized {
         rddQueue += ssc.sparkContext.makeRDD(1 to 10000, 10)
       }
