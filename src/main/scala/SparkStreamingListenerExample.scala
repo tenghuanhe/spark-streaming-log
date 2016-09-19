@@ -10,14 +10,14 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 /**
   * Created by tenghuanhe on 2016/9/16.
   */
-object SparkLog {
+object SparkStreamingListenerExample {
   def main(args: Array[String]) {
 
     Logger.getLogger("org").setLevel(Level.OFF)
     Logger.getLogger("akka").setLevel(Level.OFF)
     Logger.getLogger("com").setLevel(Level.OFF)
 
-    val sparkConf = new SparkConf().setAppName("QueueStream").setMaster("local[1]")
+    val sparkConf = new SparkConf().setAppName("SparkStreamingListenerExample").setMaster("local[1]")
     // Create the context
     val ssc = new StreamingContext(sparkConf, Seconds(1))
 
@@ -36,9 +36,9 @@ object SparkLog {
     ssc.start()
 
     // Create and push some RDDs into rddQueue
-    for (i <- 1 to 10000) {
+    for (i <- 1 to 5) {
       rddQueue.synchronized {
-        rddQueue += ssc.sparkContext.makeRDD(1 to 10000, 10)
+        rddQueue += ssc.sparkContext.makeRDD(1 to 10000, 1)
       }
 
       Thread.sleep(1000)
